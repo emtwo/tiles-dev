@@ -198,6 +198,6 @@
   background-position: -264px 0;
 }
 
-.newtab-control-sponsored.active {
+.newtab-control-sponsored[panelShown]{
   background-position: -280px 0;
 }
