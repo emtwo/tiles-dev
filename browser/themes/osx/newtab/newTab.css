@@ -138,6 +138,11 @@
   background-size: cover;
 }
 
+.newtab-site[sponsored] .newtab-thumbnail {
+  background-position: top center;
+  background-size: auto;
+}
+
 /* TITLES */
 .newtab-title {
   padding: 0 8px;
