@@ -90,23 +90,14 @@
 
 /* CELLS */
 .newtab-cell {
-  -moz-margin-end: 20px;
   background-color: rgba(255,255,255,.2);
-  border: 1px;
-  border-color: #dee0e1;
-  height: 150px;
-  margin: 16px;
-  width: 243px;
+  border: 1px solid #dee0e1;
   transition: border-color 100ms ease-out;
 }
 
 .newtab-cell:empty {
   border: 1px dashed;
   border-color: rgba(8,22,37,.15) rgba(8,22,37,.17) rgba(8,22,37,.19);
-}
-
-.newtab-cell:last-child {
-  -moz-margin-end: 0;
 }
 
 .newtab-cell:hover:not(:empty):not([dragged]) {
