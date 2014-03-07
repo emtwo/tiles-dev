@@ -152,10 +152,11 @@ input[type=button] {
 
 /* TITLES */
 .newtab-title {
+  bottom: -20px;
   position: absolute;
   left: 0;
+  line-height: 20px;
   right: 0;
-  bottom: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
