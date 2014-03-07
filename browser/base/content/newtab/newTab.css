@@ -82,6 +82,7 @@ input[type=button] {
   display: -moz-box;
   -moz-box-flex: 5;
   -moz-box-orient: vertical;
+  -moz-box-pack: center;
   min-width: 600px;
   min-height: 400px;
   transition: 100ms ease-out;
@@ -102,13 +103,12 @@ input[type=button] {
   display: -moz-box;
   -moz-box-orient: horizontal;
   -moz-box-direction: normal;
-  -moz-box-flex: 1;
+  -moz-box-pack: center;
 }
 
 /* CELLS */
 .newtab-cell {
   display: -moz-box;
-  -moz-box-flex: 1;
 }
 
 /* SITES */
