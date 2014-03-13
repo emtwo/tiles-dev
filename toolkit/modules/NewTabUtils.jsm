@@ -623,6 +623,9 @@ let PlacesProvider = {
               title: title,
               frecency: frecency,
               lastVisitDate: lastVisitDate,
+              bgColor: "transparent",
+              type: "history",
+              imageURI: null,
             });
           }
         }
