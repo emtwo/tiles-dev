@@ -159,6 +159,12 @@ function clearHistory(aCallback) {
 
 function fillHistory(aLinks, aCallback) {
   let numLinks = aLinks.length;
+  if (!numLinks) {
+    if (aCallback)
+      executeSoon(aCallback);
+    return;
+  }
+
   let transitionLink = Ci.nsINavHistoryService.TRANSITION_LINK;
 
   for (let link of aLinks.reverse()) {
@@ -172,7 +178,7 @@ function fillHistory(aLinks, aCallback) {
       handleError: function () ok(false, "couldn't add visit to history"),
       handleResult: function () {},
       handleCompletion: function () {
-        if (--numLinks == 0)
+        if (--numLinks == 0 && aCallback)
           aCallback();
       }
     });
