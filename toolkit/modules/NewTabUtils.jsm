@@ -1328,7 +1328,7 @@ this.NewTabUtils = {
       PlacesProvider.init();
       DirectoryProvider.init();
       Links.addProvider(PlacesProvider);
-      Links.addProvider(DirectoryTilesProvider);
+      Links.addProvider(DirectoryProvider);
     }
   },
 
