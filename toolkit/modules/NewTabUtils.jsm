@@ -74,6 +74,9 @@ const LINKS_GET_LINKS_LIMIT = 100;
 // The gather telemetry topic.
 const TOPIC_GATHER_TELEMETRY = "gather-telemetry";
 
+// The timeout period used in scheduleUpdateForHiddenPages.
+const SCHEDULE_UPDATE_TIMEOUT = 1000;
+
 // The threshold when a Places link becomes a history tile and pushes out a
 // directory tile.
 const DIRECTORY_FREECENCY = 1000;
