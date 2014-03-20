@@ -9,9 +9,14 @@ this.EXPORTED_SYMBOLS = ["NewTabUtils"];
 const Ci = Components.interfaces;
 const Cc = Components.classes;
 const Cu = Components.utils;
+const XMLHttpRequest =
+  Components.Constructor("@mozilla.org/xmlextras/xmlhttprequest;1", "nsIXMLHttpRequest");
 
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/Task.jsm");
+Cu.import("resource://gre/modules/FileUtils.jsm");
+Cu.import("resource://gre/modules/osfile.jsm");
 
 XPCOMUtils.defineLazyModuleGetter(this, "PlacesUtils",
   "resource://gre/modules/PlacesUtils.jsm");
@@ -63,7 +68,10 @@ const PREF_MATCH_OS_LOCALE = "intl.locale.matchOS";
 const PREF_SELECTED_LOCALE = "general.useragent.locale";
 
 // The preference that tells where to obtain directory tiles
-const PREF_DIRECTORY_SOURCE = "browser.newtabpage.directorySource";
+const PREF_DIRECTORY_SOURCE = "browser.newtabpage.directorySource.local";
+
+// The preference that tells where the directory tiles host lives.
+const PREF_DIRECTORY_HOST = "browser.newtabpage.directorySource.host";
 
 // The maximum number of results PlacesProvider retrieves from history.
 const HISTORY_RESULTS_LIMIT = 100;
@@ -746,10 +754,13 @@ let DirectoryProvider = {
 
   __tilesURL: null,
 
+  _remoteTilesURL: OS.Path.join(OS.Constants.Path.profileDir, "remoteDirectoryTiles.json"),
+
   _observers: [],
 
   get _prefs() Object.freeze({
-    tilesURL: PREF_DIRECTORY_SOURCE,
+    localTilesURL: PREF_DIRECTORY_SOURCE,
+    hostTilesURL: PREF_DIRECTORY_HOST,
     matchOSLocale: PREF_MATCH_OS_LOCALE,
     prefSelectedLocale: PREF_SELECTED_LOCALE,
   }),
@@ -757,7 +768,10 @@ let DirectoryProvider = {
   get _tilesURL() {
     if (!this.__tilesURL) {
       try {
-        this.__tilesURL = Services.prefs.getCharPref(this._prefs["tilesURL"]);
+        this.__tilesURL = FileUtils.File(this._remoteTilesURL);
+        if (!this.__tilesURL.exists()) {
+          this.__tilesURL = Services.prefs.getCharPref(this._prefs["localTilesURL"]);
+        }
       }
       catch (e) {
         Cu.reportError("Error fetching directory tiles url from prefs: " + e);
@@ -766,9 +780,36 @@ let DirectoryProvider = {
     return this.__tilesURL;
   },
 
+  _errorHandler: function(e) {
+    Cu.reportError("Error " + e.target.status + " occurred while requesting directory content.");
+  },
+
+  _requestRemoteDirectoryContent: function(url) {
+    Components.utils.reportError("REQUESTING!!!");
+    let xmlHttp = new XMLHttpRequest();
+    xmlHttp.overrideMimeType("application/json");
+
+    let self = this;
+    xmlHttp.onload = function() {
+      Task.spawn(function() {
+        try {
+          yield OS.File.writeAtomic(self._remoteTilesURL, this.responseText);
+        } catch(e) {
+          Cu.reportError("Error writing server response to " + self._remoteTilesURL + ": " + e);
+        }
+      }.bind(this));
+    };
+    xmlHttp.onerror = this._errorHandler.bind(this);
+
+    xmlHttp.open('GET', url);
+    xmlHttp.setRequestHeader("Connection", "close");
+    xmlHttp.send();
+  },
+
+
   observe: function DirectoryProvider_observe(aSubject, aTopic, aData) {
     if (aTopic == "nsPref:changed") {
-      if (aData == this._prefs["tilesURL"]) {
+      if (aData == this._prefs["localtilesURL"] || aData == this._prefs["hostTilesURL"]) {
         delete this.__tilesURL;
       }
       this._callObservers("onManyLinksChanged");
@@ -839,6 +880,7 @@ let DirectoryProvider = {
 
   init: function DirectoryProvider_init() {
     this._addPrefsObserver();
+    this._requestRemoteDirectoryContent(Services.prefs.getCharPref(this._prefs["hostTilesURL"]));
   },
 
   /**
